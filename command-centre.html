@@ -1,657 +1,641 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command Centre - Modular System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F5F2ED; --surface:#FDFBF8; --surface2:#F0EDE8; --border:#E2DDD6;
+  --text:#1A1714; --text-muted:#8A8178;
+  --accent:#2C5F2E; --accent-light:#E8F0E8;
+  --warn:#B8540A; --warn-light:#FEF3E8;
+  --danger:#A8200D; --danger-light:#FDECEA;
+  --blue:#1B4F8A; --blue-light:#E8EFF8;
+  --purple:#5B3A8C; --purple-light:#F0EAF8;
+  --yellow:#FFC107; --yellow-light:#FFF9E6;
+  --gray:#8A8178; --gray-light:#F0EDE8;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; }
+
+header { background:var(--text); color:white; padding:0 32px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; }
+.header-brand { font-family:'DM Serif Display',serif; font-size:20px; }
+.header-right { display:flex; align-items:center; gap:12px; }
+
+.user-selector select {
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white;
+  padding:6px 30px 6px 12px; border-radius:6px; font-size:13px; cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center;
+}
+
+.sync-status { font-size:11px; color:rgba(255,255,255,0.45); display:flex; align-items:center; gap:5px; }
+.sync-dot { width:6px; height:6px; border-radius:50%; background:#4CAF50; }
+.sync-dot.syncing { background:#FFA726; animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.btn-add { background:var(--accent); color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; }
+.btn-add:hover { background:#224a24; }
+
+.config-banner { background:#FFF8E1; border-bottom:1px solid #FFE082; padding:12px 32px; display:flex; align-items:center; gap:12px; font-size:13px; }
+.config-banner.hidden { display:none; }
+.config-banner input { flex:1; max-width:560px; padding:7px 12px; border:1px solid #FFD54F; border-radius:6px; font-size:13px; }
+.btn-connect { background:#F57F17; color:white; border:none; padding:7px 16px; border-radius:6px; font-size:13px; cursor:pointer; }
+
+main { padding:28px 32px; max-width:1400px; margin:0 auto; }
+
+.summary-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }
+.summary-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px; cursor:pointer; transition:box-shadow 0.12s; }
+.summary-card:hover { box-shadow:0 2px 8px rgba(0,0,0,0.07); }
+.summary-num { font-family:'DM Serif Display',serif; font-size:32px; line-height:1; margin-bottom:4px; }
+.summary-label { font-size:12px; color:var(--text-muted); }
+
+.filters { display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+.filter-chip { padding:5px 12px; border-radius:20px; border:1px solid var(--border); background:var(--surface); font-size:12.5px; cursor:pointer; transition:all 0.12s; color:var(--text-muted); }
+.filter-chip:hover { border-color:#bbb; color:var(--text); }
+.filter-chip.active { background:var(--text); border-color:var(--text); color:white; font-weight:500; }
+
+.task-row {
+  display:grid;
+  grid-template-columns:32px 60px 1fr 150px 180px 120px;
+  align-items:center;
+  padding:10px 12px;
+  border-radius:7px;
+  border:1px solid var(--border);
+  transition:all 0.12s;
+  background:var(--surface);
+  margin-bottom:4px;
+  cursor:pointer;
+}
+.task-row:hover { box-shadow:0 1px 6px rgba(0,0,0,0.07); border-color:#d0ccc7; }
+.task-row.done { opacity:0.5; }
+
+.task-check { width:18px; height:18px; border-radius:4px; border:1.5px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.12s; }
+.task-check:hover { border-color:var(--accent); }
+.task-check.checked { background:var(--accent); border-color:var(--accent); color:white; font-size:11px; }
+
+.priority-badge { padding:2px 8px; border-radius:12px; font-size:10px; font-weight:600; display:inline-block; }
+.priority-P1 { background:#FDECEA; color:#A8200D; }
+.priority-P2 { background:#FEF3E8; color:#B8540A; }
+.priority-P3 { background:#FFF9E6; color:#FFC107; }
+.priority-P4 { background:#F0EDE8; color:#8A8178; }
+
+.task-content { display:flex; flex-direction:column; gap:2px; }
+.task-name { font-size:13.5px; font-weight:500; }
+.task-meta { font-size:11px; color:var(--text-muted); display:flex; gap:8px; align-items:center; }
+.task-meta-item { display:flex; align-items:center; gap:3px; }
+
+.task-assignee { font-size:12.5px; color:var(--text); }
+.task-dept { font-size:12px; color:var(--text-muted); }
+.task-due { font-size:12.5px; color:var(--text-muted); }
+.task-due.overdue { color:var(--danger); font-weight:500; }
+
+.task-actions { display:flex; gap:4px; justify-content:flex-end; opacity:0; transition:opacity 0.12s; }
+.task-row:hover .task-actions { opacity:1; }
+.icon-btn { width:26px; height:26px; border-radius:5px; border:1px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; transition:all 0.12s; }
+.icon-btn:hover { background:var(--bg); }
+.icon-btn.btn-delete:hover { color:var(--danger); }
+
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(26,23,20,0.45); z-index:200; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border-radius:14px; padding:28px; width:560px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+.modal-title { font-family:'DM Serif Display',serif; font-size:20px; margin-bottom:22px; }
+
+.form-row { margin-bottom:16px; }
+.form-row label { display:block; font-size:12px; font-weight:500; letter-spacing:0.3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }
+.form-row input, .form-row select, .form-row textarea { width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:7px; font-size:13.5px; background:var(--bg); color:var(--text); outline:none; transition:border-color 0.12s; font-family:'DM Sans',sans-serif; }
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color:var(--accent); }
+.form-row textarea { min-height:60px; resize:vertical; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.form-section { margin:20px 0; padding:16px; background:var(--surface2); border-radius:8px; }
+.form-section-title { font-size:13px; font-weight:600; margin-bottom:12px; color:var(--text); }
+
+.checkbox-group { display:flex; flex-direction:column; gap:8px; }
+.checkbox-item { display:flex; align-items:center; gap:8px; }
+.checkbox-item input { width:18px; height:18px; cursor:pointer; }
+.checkbox-item label { font-size:13px; cursor:pointer; text-transform:none; font-weight:400; margin:0; }
+
+.checklist-items { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.checklist-item { display:flex; align-items:center; gap:8px; padding:8px; background:var(--surface); border-radius:6px; }
+.checklist-item input[type="text"] { flex:1; border:none; background:transparent; font-size:13px; }
+.checklist-remove { color:var(--danger); cursor:pointer; font-size:16px; }
+
+.btn-add-item { padding:6px 12px; background:var(--blue-light); color:var(--blue); border:none; border-radius:6px; font-size:12px; cursor:pointer; margin-top:8px; }
+
+.modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:24px; }
+.btn-cancel { padding:8px 16px; border-radius:7px; border:1px solid var(--border); background:transparent; font-size:13px; cursor:pointer; color:var(--text-muted); }
+.btn-save { padding:8px 20px; border-radius:7px; border:none; background:var(--accent); color:white; font-size:13px; font-weight:500; cursor:pointer; }
+
+.loading { text-align:center; padding:60px; color:var(--text-muted); }
+.spinner { width:28px; height:28px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 12px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.toast { position:fixed; bottom:24px; right:24px; background:var(--text); color:white; padding:12px 18px; border-radius:8px; font-size:13px; z-index:300; opacity:0; transform:translateY(8px); transition:all 0.2s; }
+.toast.show { opacity:1; transform:translateY(0); }
+
+.comments-section { margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }
+.comment { padding:10px; background:var(--surface2); border-radius:6px; margin-bottom:8px; }
+.comment-header { display:flex; justify-content:space-between; margin-bottom:4px; }
+.comment-author { font-size:12px; font-weight:600; }
+.comment-time { font-size:11px; color:var(--text-muted); }
+.comment-text { font-size:13px; }
+.comment-input { display:flex; gap:8px; margin-top:8px; }
+.comment-input input { flex:1; }
+.comment-input button { padding:6px 12px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; }
+</style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="en"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1">&lt;title&gt;Command Centre - Modular System&lt;/title&gt;</p>
-<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&amp;family=DM+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet"&gt;</p>
-<p class="p1">&lt;style&gt;</p>
-<p class="p1">:root {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--bg:#F5F2ED; --surface:#FDFBF8; --surface2:#F0EDE8; --border:#E2DDD6;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--text:#1A1714; --text-muted:#8A8178;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--accent:#2C5F2E; --accent-light:#E8F0E8;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--warn:#B8540A; --warn-light:#FEF3E8;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--danger:#A8200D; --danger-light:#FDECEA;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--blue:#1B4F8A; --blue-light:#E8EFF8;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--purple:#5B3A8C; --purple-light:#F0EAF8;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--yellow:#FFC107; --yellow-light:#FFF9E6;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--gray:#8A8178; --gray-light:#F0EDE8;</p>
-<p class="p1">}</p>
-<p class="p1">* { box-sizing:border-box; margin:0; padding:0; }</p>
-<p class="p1">body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size:14px; }</p>
-<p class="p2"><br></p>
-<p class="p1">header { background:var(--text); color:white; padding:0 32px; display:flex; align-items:center; justify-content:space-between; height:60px; position:sticky; top:0; z-index:100; }</p>
-<p class="p1">.header-brand { font-family:'DM Serif Display',serif; font-size:20px; }</p>
-<p class="p1">.header-right { display:flex; align-items:center; gap:12px; }</p>
-<p class="p2"><br></p>
-<p class="p1">.user-selector select {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>padding:6px 30px 6px 12px; border-radius:6px; font-size:13px; cursor:pointer; appearance:none;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background-repeat:no-repeat; background-position:right 10px center;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">.sync-status { font-size:11px; color:rgba(255,255,255,0.45); display:flex; align-items:center; gap:5px; }</p>
-<p class="p1">.sync-dot { width:6px; height:6px; border-radius:50%; background:#4CAF50; }</p>
-<p class="p1">.sync-dot.syncing { background:#FFA726; animation:pulse 1s infinite; }</p>
-<p class="p1">@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }</p>
-<p class="p2"><br></p>
-<p class="p1">.btn-add { background:var(--accent); color:white; border:none; padding:8px 16px; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; }</p>
-<p class="p1">.btn-add:hover { background:#224a24; }</p>
-<p class="p2"><br></p>
-<p class="p1">.config-banner { background:#FFF8E1; border-bottom:1px solid #FFE082; padding:12px 32px; display:flex; align-items:center; gap:12px; font-size:13px; }</p>
-<p class="p1">.config-banner.hidden { display:none; }</p>
-<p class="p1">.config-banner input { flex:1; max-width:560px; padding:7px 12px; border:1px solid #FFD54F; border-radius:6px; font-size:13px; }</p>
-<p class="p1">.btn-connect { background:#F57F17; color:white; border:none; padding:7px 16px; border-radius:6px; font-size:13px; cursor:pointer; }</p>
-<p class="p2"><br></p>
-<p class="p1">main { padding:28px 32px; max-width:1400px; margin:0 auto; }</p>
-<p class="p2"><br></p>
-<p class="p1">.summary-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px; }</p>
-<p class="p1">.summary-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px; cursor:pointer; transition:box-shadow 0.12s; }</p>
-<p class="p1">.summary-card:hover { box-shadow:0 2px 8px rgba(0,0,0,0.07); }</p>
-<p class="p1">.summary-num { font-family:'DM Serif Display',serif; font-size:32px; line-height:1; margin-bottom:4px; }</p>
-<p class="p1">.summary-label { font-size:12px; color:var(--text-muted); }</p>
-<p class="p2"><br></p>
-<p class="p1">.filters { display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap; }</p>
-<p class="p1">.filter-chip { padding:5px 12px; border-radius:20px; border:1px solid var(--border); background:var(--surface); font-size:12.5px; cursor:pointer; transition:all 0.12s; color:var(--text-muted); }</p>
-<p class="p1">.filter-chip:hover { border-color:#bbb; color:var(--text); }</p>
-<p class="p1">.filter-chip.active { background:var(--text); border-color:var(--text); color:white; font-weight:500; }</p>
-<p class="p2"><br></p>
-<p class="p1">.task-row {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>display:grid;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>grid-template-columns:32px 60px 1fr 150px 180px 120px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>align-items:center;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>padding:10px 12px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>border-radius:7px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>border:1px solid var(--border);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>transition:all 0.12s;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background:var(--surface);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>margin-bottom:4px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>cursor:pointer;</p>
-<p class="p1">}</p>
-<p class="p1">.task-row:hover { box-shadow:0 1px 6px rgba(0,0,0,0.07); border-color:#d0ccc7; }</p>
-<p class="p1">.task-row.done { opacity:0.5; }</p>
-<p class="p2"><br></p>
-<p class="p1">.task-check { width:18px; height:18px; border-radius:4px; border:1.5px solid var(--border); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.12s; }</p>
-<p class="p1">.task-check:hover { border-color:var(--accent); }</p>
-<p class="p1">.task-check.checked { background:var(--accent); border-color:var(--accent); color:white; font-size:11px; }</p>
-<p class="p2"><br></p>
-<p class="p1">.priority-badge { padding:2px 8px; border-radius:12px; font-size:10px; font-weight:600; display:inline-block; }</p>
-<p class="p1">.priority-P1 { background:#FDECEA; color:#A8200D; }</p>
-<p class="p1">.priority-P2 { background:#FEF3E8; color:#B8540A; }</p>
-<p class="p1">.priority-P3 { background:#FFF9E6; color:#FFC107; }</p>
-<p class="p1">.priority-P4 { background:#F0EDE8; color:#8A8178; }</p>
-<p class="p2"><br></p>
-<p class="p1">.task-content { display:flex; flex-direction:column; gap:2px; }</p>
-<p class="p1">.task-name { font-size:13.5px; font-weight:500; }</p>
-<p class="p1">.task-meta { font-size:11px; color:var(--text-muted); display:flex; gap:8px; align-items:center; }</p>
-<p class="p1">.task-meta-item { display:flex; align-items:center; gap:3px; }</p>
-<p class="p2"><br></p>
-<p class="p1">.task-assignee { font-size:12.5px; color:var(--text); }</p>
-<p class="p1">.task-dept { font-size:12px; color:var(--text-muted); }</p>
-<p class="p1">.task-due { font-size:12.5px; color:var(--text-muted); }</p>
-<p class="p1">.task-due.overdue { color:var(--danger); font-weight:500; }</p>
-<p class="p2"><br></p>
-<p class="p1">.task-actions { display:flex; gap:4px; justify-content:flex-end; opacity:0; transition:opacity 0.12s; }</p>
-<p class="p1">.task-row:hover .task-actions { opacity:1; }</p>
-<p class="p1">.icon-btn { width:26px; height:26px; border-radius:5px; border:1px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:13px; transition:all 0.12s; }</p>
-<p class="p1">.icon-btn:hover { background:var(--bg); }</p>
-<p class="p1">.icon-btn.btn-delete:hover { color:var(--danger); }</p>
-<p class="p2"><br></p>
-<p class="p1">.modal-overlay { display:none; position:fixed; inset:0; background:rgba(26,23,20,0.45); z-index:200; align-items:center; justify-content:center; }</p>
-<p class="p1">.modal-overlay.open { display:flex; }</p>
-<p class="p1">.modal { background:var(--surface); border-radius:14px; padding:28px; width:560px; max-width:95vw; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2); }</p>
-<p class="p1">.modal-title { font-family:'DM Serif Display',serif; font-size:20px; margin-bottom:22px; }</p>
-<p class="p2"><br></p>
-<p class="p1">.form-row { margin-bottom:16px; }</p>
-<p class="p1">.form-row label { display:block; font-size:12px; font-weight:500; letter-spacing:0.3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; }</p>
-<p class="p1">.form-row input, .form-row select, .form-row textarea { width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:7px; font-size:13.5px; background:var(--bg); color:var(--text); outline:none; transition:border-color 0.12s; font-family:'DM Sans',sans-serif; }</p>
-<p class="p1">.form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color:var(--accent); }</p>
-<p class="p1">.form-row textarea { min-height:60px; resize:vertical; }</p>
-<p class="p1">.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }</p>
-<p class="p2"><br></p>
-<p class="p1">.form-section { margin:20px 0; padding:16px; background:var(--surface2); border-radius:8px; }</p>
-<p class="p1">.form-section-title { font-size:13px; font-weight:600; margin-bottom:12px; color:var(--text); }</p>
-<p class="p2"><br></p>
-<p class="p1">.checkbox-group { display:flex; flex-direction:column; gap:8px; }</p>
-<p class="p1">.checkbox-item { display:flex; align-items:center; gap:8px; }</p>
-<p class="p1">.checkbox-item input { width:18px; height:18px; cursor:pointer; }</p>
-<p class="p1">.checkbox-item label { font-size:13px; cursor:pointer; text-transform:none; font-weight:400; margin:0; }</p>
-<p class="p2"><br></p>
-<p class="p1">.checklist-items { display:flex; flex-direction:column; gap:6px; margin-top:8px; }</p>
-<p class="p1">.checklist-item { display:flex; align-items:center; gap:8px; padding:8px; background:var(--surface); border-radius:6px; }</p>
-<p class="p1">.checklist-item input[type="text"] { flex:1; border:none; background:transparent; font-size:13px; }</p>
-<p class="p1">.checklist-remove { color:var(--danger); cursor:pointer; font-size:16px; }</p>
-<p class="p2"><br></p>
-<p class="p1">.btn-add-item { padding:6px 12px; background:var(--blue-light); color:var(--blue); border:none; border-radius:6px; font-size:12px; cursor:pointer; margin-top:8px; }</p>
-<p class="p2"><br></p>
-<p class="p1">.modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:24px; }</p>
-<p class="p1">.btn-cancel { padding:8px 16px; border-radius:7px; border:1px solid var(--border); background:transparent; font-size:13px; cursor:pointer; color:var(--text-muted); }</p>
-<p class="p1">.btn-save { padding:8px 20px; border-radius:7px; border:none; background:var(--accent); color:white; font-size:13px; font-weight:500; cursor:pointer; }</p>
-<p class="p2"><br></p>
-<p class="p1">.loading { text-align:center; padding:60px; color:var(--text-muted); }</p>
-<p class="p1">.spinner { width:28px; height:28px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 12px; }</p>
-<p class="p1">@keyframes spin { to{transform:rotate(360deg)} }</p>
-<p class="p2"><br></p>
-<p class="p1">.toast { position:fixed; bottom:24px; right:24px; background:var(--text); color:white; padding:12px 18px; border-radius:8px; font-size:13px; z-index:300; opacity:0; transform:translateY(8px); transition:all 0.2s; }</p>
-<p class="p1">.toast.show { opacity:1; transform:translateY(0); }</p>
-<p class="p2"><br></p>
-<p class="p1">.comments-section { margin-top:16px; padding-top:16px; border-top:1px solid var(--border); }</p>
-<p class="p1">.comment { padding:10px; background:var(--surface2); border-radius:6px; margin-bottom:8px; }</p>
-<p class="p1">.comment-header { display:flex; justify-content:space-between; margin-bottom:4px; }</p>
-<p class="p1">.comment-author { font-size:12px; font-weight:600; }</p>
-<p class="p1">.comment-time { font-size:11px; color:var(--text-muted); }</p>
-<p class="p1">.comment-text { font-size:13px; }</p>
-<p class="p1">.comment-input { display:flex; gap:8px; margin-top:8px; }</p>
-<p class="p1">.comment-input input { flex:1; }</p>
-<p class="p1">.comment-input button { padding:6px 12px; background:var(--accent); color:white; border:none; border-radius:6px; cursor:pointer; }</p>
-<p class="p1">&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;header&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="header-brand"&gt;Command Centre&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="header-right"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="user-selector"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;select id="user-filter" onchange="setUserFilter()"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;option value=""&gt;View as: Everyone&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="sync-status"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="sync-dot" id="sync-dot"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;span id="sync-label"&gt;Connected&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button class="btn-add" onclick="openModal()"&gt;+ Add Task&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/header&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;div class="config-banner" id="config-banner"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>⚙️ &lt;strong&gt;Setup:&lt;/strong&gt; Paste your Google Apps Script URL here.</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/.../exec" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;button class="btn-connect" onclick="saveScriptUrl()"&gt;Connect&lt;/button&gt;</p>
-<p class="p1">&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;main&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="summary-bar"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="summary-card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="summary-num" id="s-overdue"&gt;—&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="summary-label"&gt;Overdue&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="summary-card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="summary-num" id="s-week"&gt;—&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="summary-label"&gt;This Week&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="summary-card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="summary-num" id="s-available"&gt;—&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="summary-label"&gt;Available&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="summary-card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="summary-num" id="s-done"&gt;—&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="summary-label"&gt;Done&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="filters"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="filter-chip active" data-dept="all" onclick="setDeptFilter('all',this)"&gt;All Departments&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="task-container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="loading"&gt;&lt;div class="spinner"&gt;&lt;/div&gt;Connect to get started&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/main&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;div class="modal-overlay" id="modal"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="modal"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modal-title" id="modal-title"&gt;Add New Task&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="form-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;label&gt;Task Name&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" id="f-name" placeholder="Task description" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="form-grid"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="form-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;label&gt;Department&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;select id="f-dept"&gt;&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="form-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;label&gt;Priority&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;select id="f-priority"&gt;&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="form-grid"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="form-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;label&gt;Assignment Type&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;select id="f-assignment-type" onchange="toggleAssignee()"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="individual"&gt;Individual&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="department"&gt;Department (anyone)&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="form-row" id="assignee-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;label&gt;Assigned To&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;select id="f-assignee"&gt;&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="form-grid"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="form-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;label&gt;Due Date&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;input type="date" id="f-due" /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="form-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;label&gt;Recurrence&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;select id="f-recur"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="none"&gt;No recurrence&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="daily"&gt;Every day&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="every-2-days"&gt;Every 2 days&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="every-3-days"&gt;Every 3 days&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="weekly"&gt;Weekly&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="fortnightly"&gt;Fortnightly&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="monthly"&gt;Monthly&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="quarterly"&gt;Quarterly&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;option value="annually"&gt;Annually&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="form-row"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;label&gt;Notes (optional)&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;textarea id="f-notes" placeholder="Additional context..."&gt;&lt;/textarea&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="form-section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="form-section-title"&gt;Checklist (optional)&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="checklist-items" id="checklist-items"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button type="button" class="btn-add-item" onclick="addChecklistItem()"&gt;+ Add Item&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="form-section"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="form-section-title"&gt;Notifications&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="checkbox-group"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="checkbox-item"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="checkbox" id="n-assign-assignee" checked /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;label for="n-assign-assignee"&gt;Notify assignee on assignment&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="checkbox-item"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="checkbox" id="n-comment-creator" checked /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;label for="n-comment-creator"&gt;Notify creator on comments&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="checkbox-item"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="checkbox" id="n-comment-assignee" checked /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;label for="n-comment-assignee"&gt;Notify assignee on comments&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="checkbox-item"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="checkbox" id="n-complete-creator" checked /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;label for="n-complete-creator"&gt;Notify creator on completion&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="checkbox-item"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="checkbox" id="n-complete-assignee" checked /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;label for="n-complete-assignee"&gt;Notify assignee on completion&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="checkbox-item"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;input type="checkbox" id="n-overdue" checked /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;label for="n-overdue"&gt;Notify when overdue&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="modal-footer"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-cancel" onclick="closeModal()"&gt;Cancel&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn-save" onclick="saveTask()"&gt;Save Task&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;div class="toast" id="toast"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">const SCRIPT_URL_KEY = 'commandCentreScriptUrl';</p>
-<p class="p1">let SCRIPT_URL = localStorage.getItem(SCRIPT_URL_KEY) || '';</p>
-<p class="p2"><br></p>
-<p class="p1">let tasks = [];</p>
-<p class="p1">let team = [];</p>
-<p class="p1">let departments = [];</p>
-<p class="p1">let priorities = [];</p>
-<p class="p1">let currentUser = '';</p>
-<p class="p1">let currentDept = 'all';</p>
-<p class="p1">let editingId = null;</p>
-<p class="p1">let checklistItems = [];</p>
-<p class="p2"><br></p>
-<p class="p1">window.onload = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (SCRIPT_URL) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('config-banner').classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.getElementById('script-url-input').value = SCRIPT_URL;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>loadData();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1">};</p>
-<p class="p2"><br></p>
-<p class="p1">function saveScriptUrl() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const val = document.getElementById('script-url-input').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!val.startsWith('https://script.google.com')) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>alert('Please paste a valid Google Apps Script URL');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>SCRIPT_URL = val;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>localStorage.setItem(SCRIPT_URL_KEY, SCRIPT_URL);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('config-banner').classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>loadData();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function setSyncStatus(state) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const dot = document.getElementById('sync-dot');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const label = document.getElementById('sync-label');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : '');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>label.textContent = state === 'syncing' ? 'Syncing...' : 'Connected';</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">async function api(params) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setSyncStatus('syncing');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const res = await fetch(SCRIPT_URL, {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>method: 'POST',</p>
-<p class="p1"><span class="Apple-converted-space">      </span>body: JSON.stringify(params)</p>
-<p class="p1"><span class="Apple-converted-space">    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const data = await res.json();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>setSyncStatus('ok');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return data;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>} catch(e) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>setSyncStatus('error');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>console.error(e);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return { error: e.message };</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">async function loadData() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('task-container').innerHTML = '&lt;div class="loading"&gt;&lt;div class="spinner"&gt;&lt;/div&gt;&lt;p&gt;Loading...&lt;/p&gt;&lt;/div&gt;';</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const [tasksRes, teamRes, deptsRes, prioritiesRes] = await Promise.all([</p>
-<p class="p1"><span class="Apple-converted-space">    </span>api({ action: 'getTasks' }),</p>
-<p class="p1"><span class="Apple-converted-space">    </span>api({ action: 'getTeam' }),</p>
-<p class="p1"><span class="Apple-converted-space">    </span>api({ action: 'getDepartments' }),</p>
-<p class="p1"><span class="Apple-converted-space">    </span>api({ action: 'getPriorities' })</p>
-<p class="p1"><span class="Apple-converted-space">  </span>]);</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (tasksRes.success) tasks = tasksRes.tasks;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (teamRes.success) team = teamRes.team;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (deptsRes.success) departments = deptsRes.departments;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (prioritiesRes.success) priorities = prioritiesRes.priorities;</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>populateFilters();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>populateUserFilter();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderTasks();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>showToast('Data loaded ✓');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function populateFilters() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const filtersDiv = document.querySelector('.filters');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>filtersDiv.innerHTML = '&lt;div class="filter-chip active" data-dept="all" onclick="setDeptFilter(\'all\',this)"&gt;All Departments&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>departments.forEach(d =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>filtersDiv.innerHTML += `&lt;div class="filter-chip" data-dept="${d.id}" onclick="setDeptFilter('${d.id}',this)"&gt;${d.name}&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function populateUserFilter() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const select = document.getElementById('user-filter');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>select.innerHTML = '&lt;option value=""&gt;View as: Everyone&lt;/option&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>team.forEach(p =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const opt = document.createElement('option');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>opt.value = p.id;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>opt.textContent = `View as: ${p.name}`;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>select.appendChild(opt);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>});</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function setUserFilter() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>currentUser = document.getElementById('user-filter').value;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderTasks();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function setDeptFilter(deptId, el) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>currentDept = deptId;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.querySelectorAll('.filter-chip').forEach(c =&gt; c.classList.remove('active'));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>el.classList.add('active');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderTasks();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function getFilteredTasks() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>let f = [...tasks];</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (currentUser) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const userDept = team.find(t =&gt; t.id === currentUser)?.departmentId;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>f = f.filter(t =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>if (t.assignmentType === 'individual') return t.assigneeId === currentUser;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>return t.departmentId === userDept;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>});</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (currentDept !== 'all') {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>f = f.filter(t =&gt; t.departmentId === currentDept);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>return f;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function renderTasks() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const container = document.getElementById('task-container');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const filtered = getFilteredTasks();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (filtered.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>container.innerHTML = '&lt;div class="loading"&gt;No tasks&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>updateCounts();</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>container.innerHTML = filtered.map(t =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const priority = getPriorityById(t.priorityId);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const assignee = getTeamById(t.assigneeId);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const dept = getDeptById(t.departmentId);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const dueClass = daysFromNow(t.due) &lt; 0 ? 'overdue' : '';</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>const checklistProgress = t.checklist ? calculateChecklistProgress(t.checklist, t.checklistCompleted) : '';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const lastComment = ''; // TODO: get last comment</p>
-<p class="p2"><span class="Apple-converted-space">    </span></p>
-<p class="p1"><span class="Apple-converted-space">    </span>return `&lt;div class="task-row ${t.status==='done'?'done':''}"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="task-check ${t.status==='done'?'checked':''}" onclick="toggleDone('${t.id}',event)"&gt;${t.status==='done'?'✓':''}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div&gt;${priority ? `&lt;span class="priority-badge priority-${priority.id}"&gt;${priority.id}&lt;/span&gt;` : ''}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="task-content"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="task-name"&gt;${t.name}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="task-meta"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>${checklistProgress ? `&lt;span class="task-meta-item"&gt;✓ ${checklistProgress}&lt;/span&gt;` : ''}</p>
-<p class="p1"><span class="Apple-converted-space">          </span>${lastComment ? `&lt;span class="task-meta-item"&gt;💬 ${lastComment}&lt;/span&gt;` : ''}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="task-assignee"&gt;${assignee ? assignee.name : 'Unassigned'}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="task-dept"&gt;${dept ? dept.name : ''}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="task-due ${dueClass}"&gt;${formatDate(t.due)}&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}).join('');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>updateCounts();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function calculateChecklistProgress(checklistJson, completedJson) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const items = JSON.parse(checklistJson || '[]');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const completed = JSON.parse(completedJson || '[]');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>if (items.length === 0) return '';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return `${completed.length}/${items.length}`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>} catch(e) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function updateCounts() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const overdue = tasks.filter(t =&gt; t.status !== 'done' &amp;&amp; daysFromNow(t.due) &lt; 0).length;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const week = tasks.filter(t =&gt; t.status !== 'done' &amp;&amp; daysFromNow(t.due) &gt;= 0 &amp;&amp; daysFromNow(t.due) &lt;= 7).length;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const available = tasks.filter(t =&gt; t.assignmentType === 'department' &amp;&amp; !t.pickedUpById &amp;&amp; t.status !== 'done').length;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const done = tasks.filter(t =&gt; t.status === 'done').length;</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('s-overdue').textContent = overdue;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('s-week').textContent = week;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('s-available').textContent = available;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('s-done').textContent = done;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function daysFromNow(dateStr) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const today = new Date(); today.setHours(0,0,0,0);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const d = new Date(dateStr); d.setHours(0,0,0,0);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>return Math.round((d - today) / 86400000);</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function formatDate(dateStr) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const diff = daysFromNow(dateStr);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (diff === 0) return 'Today';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (diff === 1) return 'Tomorrow';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (diff === -1) return 'Yesterday';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (diff &lt; 0) return `${Math.abs(diff)}d overdue`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (diff &lt;= 7) return `In ${diff} days`;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const d = new Date(dateStr + 'T00:00:00');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function getTeamById(id) { return team.find(t =&gt; t.id === id); }</p>
-<p class="p1">function getDeptById(id) { return departments.find(d =&gt; d.id === id); }</p>
-<p class="p1">function getPriorityById(id) { return priorities.find(p =&gt; p.id === id); }</p>
-<p class="p2"><br></p>
-<p class="p1">async function toggleDone(id, e) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>e.stopPropagation();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const task = tasks.find(t =&gt; t.id === id);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!task) return;</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const newStatus = task.status === 'done' ? 'pending' : 'done';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>await api({ action: 'updateTask', id: task.id, status: newStatus, completedBy: currentUser || 'User' });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>await loadData();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function openModal() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>editingId = null;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modal-title').textContent = 'Add New Task';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('f-name').value = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('f-notes').value = '';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('f-assignment-type').value = 'individual';</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const deptSelect = document.getElementById('f-dept');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>deptSelect.innerHTML = departments.map(d =&gt; `&lt;option value="${d.id}"&gt;${d.name}&lt;/option&gt;`).join('');</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const prioritySelect = document.getElementById('f-priority');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>prioritySelect.innerHTML = priorities.map(p =&gt; `&lt;option value="${p.id}"&gt;${p.name}&lt;/option&gt;`).join('');</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const assigneeSelect = document.getElementById('f-assignee');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>assigneeSelect.innerHTML = '&lt;option value=""&gt;Select...&lt;/option&gt;' + team.map(t =&gt; `&lt;option value="${t.id}"&gt;${t.name}&lt;/option&gt;`).join('');</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const d = new Date(); d.setDate(d.getDate() + 7);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('f-due').value = d.toISOString().split('T')[0];</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('f-recur').value = 'none';</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>checklistItems = [];</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderChecklistItems();</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>toggleAssignee();</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modal').classList.add('open');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function closeModal() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('modal').classList.remove('open');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function toggleAssignee() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const type = document.getElementById('f-assignment-type').value;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>document.getElementById('assignee-row').style.display = type === 'individual' ? 'block' : 'none';</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function addChecklistItem() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>checklistItems.push({ text: '', checked: false });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderChecklistItems();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function renderChecklistItems() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const container = document.getElementById('checklist-items');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (checklistItems.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>container.innerHTML = '&lt;div style="font-size:12px;color:var(--text-muted)"&gt;No checklist items&lt;/div&gt;';</p>
-<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>container.innerHTML = checklistItems.map((item, i) =&gt; `</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="checklist-item"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" value="${item.text}" onchange="checklistItems[${i}].text=this.value" placeholder="Checklist item..." /&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;span class="checklist-remove" onclick="removeChecklistItem(${i})"&gt;×&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>`).join('');</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">function removeChecklistItem(idx) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>checklistItems.splice(idx, 1);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>renderChecklistItems();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">async function saveTask() {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const name = document.getElementById('f-name').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (!name) { alert('Please enter a task name'); return; }</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const assignmentType = document.getElementById('f-assignment-type').value;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const assigneeId = assignmentType === 'individual' ? document.getElementById('f-assignee').value : '';</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>const data = {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>name,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>departmentId: document.getElementById('f-dept').value,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>priorityId: document.getElementById('f-priority').value,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>assignmentType,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>assigneeId,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>assignedById: currentUser || 'ADMIN',</p>
-<p class="p1"><span class="Apple-converted-space">    </span>due: document.getElementById('f-due').value,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>recurrence: document.getElementById('f-recur').value,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>notes: document.getElementById('f-notes').value.trim(),</p>
-<p class="p1"><span class="Apple-converted-space">    </span>checklist: JSON.stringify(checklistItems.map(i =&gt; i.text).filter(t =&gt; t)),</p>
-<p class="p1"><span class="Apple-converted-space">    </span>notifyAssigneeOnAssign: document.getElementById('n-assign-assignee').checked,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>notifyCreatorOnComment: document.getElementById('n-comment-creator').checked,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>notifyAssigneeOnComment: document.getElementById('n-comment-assignee').checked,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>notifyCreatorOnComplete: document.getElementById('n-complete-creator').checked,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>notifyAssigneeOnComplete: document.getElementById('n-complete-assignee').checked,</p>
-<p class="p1"><span class="Apple-converted-space">    </span>notifyOnOverdue: document.getElementById('n-overdue').checked,</p>
-<p class="p1"><span class="Apple-converted-space">  </span>};</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>closeModal();</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>if (editingId) {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>await api({ action: 'updateTask', id: editingId, ...data });</p>
-<p class="p1"><span class="Apple-converted-space">    </span>showToast('Task updated ✓');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">    </span>await api({ action: 'addTask', ...data });</p>
-<p class="p1"><span class="Apple-converted-space">    </span>showToast('Task created ✓');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p1"><span class="Apple-converted-space">  </span>await loadData();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">document.getElementById('modal').addEventListener('click', function(e) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if(e.target === this) closeModal();</p>
-<p class="p1">});</p>
-<p class="p2"><br></p>
-<p class="p1">function showToast(msg) {</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const t = document.getElementById('toast');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>t.textContent = msg;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>t.classList.add('show');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setTimeout(() =&gt; t.classList.remove('show'), 2800);</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">setInterval(() =&gt; { if (SCRIPT_URL) loadData(); }, 60000);</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+<header>
+  <div class="header-brand">Command Centre</div>
+  <div class="header-right">
+    <div class="user-selector">
+      <select id="user-filter" onchange="setUserFilter()">
+        <option value="">View as: Everyone</option>
+      </select>
+    </div>
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">Connected</span>
+    </div>
+    <button class="btn-add" onclick="openModal()">+ Add Task</button>
+  </div>
+</header>
+
+<div class="config-banner" id="config-banner">
+  ⚙️ <strong>Setup:</strong> Paste your Google Apps Script URL here.
+  <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/.../exec" />
+  <button class="btn-connect" onclick="saveScriptUrl()">Connect</button>
+</div>
+
+<main>
+  <div class="summary-bar">
+    <div class="summary-card">
+      <div class="summary-num" id="s-overdue">—</div>
+      <div class="summary-label">Overdue</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" id="s-week">—</div>
+      <div class="summary-label">This Week</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" id="s-available">—</div>
+      <div class="summary-label">Available</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" id="s-done">—</div>
+      <div class="summary-label">Done</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-chip active" data-dept="all" onclick="setDeptFilter('all',this)">All Departments</div>
+  </div>
+
+  <div id="task-container">
+    <div class="loading"><div class="spinner"></div>Connect to get started</div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add New Task</div>
+    
+    <div class="form-row">
+      <label>Task Name</label>
+      <input type="text" id="f-name" placeholder="Task description" />
+    </div>
+
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Department</label>
+        <select id="f-dept"></select>
+      </div>
+      <div class="form-row">
+        <label>Priority</label>
+        <select id="f-priority"></select>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Assignment Type</label>
+        <select id="f-assignment-type" onchange="toggleAssignee()">
+          <option value="individual">Individual</option>
+          <option value="department">Department (anyone)</option>
+        </select>
+      </div>
+      <div class="form-row" id="assignee-row">
+        <label>Assigned To</label>
+        <select id="f-assignee"></select>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Due Date</label>
+        <input type="date" id="f-due" />
+      </div>
+      <div class="form-row">
+        <label>Recurrence</label>
+        <select id="f-recur">
+          <option value="none">No recurrence</option>
+          <option value="daily">Every day</option>
+          <option value="every-2-days">Every 2 days</option>
+          <option value="every-3-days">Every 3 days</option>
+          <option value="weekly">Weekly</option>
+          <option value="fortnightly">Fortnightly</option>
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="annually">Annually</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label>Notes (optional)</label>
+      <textarea id="f-notes" placeholder="Additional context..."></textarea>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Checklist (optional)</div>
+      <div class="checklist-items" id="checklist-items"></div>
+      <button type="button" class="btn-add-item" onclick="addChecklistItem()">+ Add Item</button>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Notifications</div>
+      <div class="checkbox-group">
+        <div class="checkbox-item">
+          <input type="checkbox" id="n-assign-assignee" checked />
+          <label for="n-assign-assignee">Notify assignee on assignment</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="n-comment-creator" checked />
+          <label for="n-comment-creator">Notify creator on comments</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="n-comment-assignee" checked />
+          <label for="n-comment-assignee">Notify assignee on comments</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="n-complete-creator" checked />
+          <label for="n-complete-creator">Notify creator on completion</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="n-complete-assignee" checked />
+          <label for="n-complete-assignee">Notify assignee on completion</label>
+        </div>
+        <div class="checkbox-item">
+          <input type="checkbox" id="n-overdue" checked />
+          <label for="n-overdue">Notify when overdue</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveTask()">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL_KEY = 'commandCentreScriptUrl';
+let SCRIPT_URL = localStorage.getItem(SCRIPT_URL_KEY) || '';
+
+let tasks = [];
+let team = [];
+let departments = [];
+let priorities = [];
+let currentUser = '';
+let currentDept = 'all';
+let editingId = null;
+let checklistItems = [];
+
+window.onload = () => {
+  if (SCRIPT_URL) {
+    document.getElementById('config-banner').classList.add('hidden');
+    document.getElementById('script-url-input').value = SCRIPT_URL;
+    loadData();
+  }
+};
+
+function saveScriptUrl() {
+  const val = document.getElementById('script-url-input').value.trim();
+  if (!val.startsWith('https://script.google.com')) {
+    alert('Please paste a valid Google Apps Script URL');
+    return;
+  }
+  SCRIPT_URL = val;
+  localStorage.setItem(SCRIPT_URL_KEY, SCRIPT_URL);
+  document.getElementById('config-banner').classList.add('hidden');
+  loadData();
+}
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : '');
+  label.textContent = state === 'syncing' ? 'Syncing...' : 'Connected';
+}
+
+async function api(params) {
+  setSyncStatus('syncing');
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(params)
+    });
+    const data = await res.json();
+    setSyncStatus('ok');
+    return data;
+  } catch(e) {
+    setSyncStatus('error');
+    console.error(e);
+    return { error: e.message };
+  }
+}
+
+async function loadData() {
+  document.getElementById('task-container').innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading...</p></div>';
+  
+  const [tasksRes, teamRes, deptsRes, prioritiesRes] = await Promise.all([
+    api({ action: 'getTasks' }),
+    api({ action: 'getTeam' }),
+    api({ action: 'getDepartments' }),
+    api({ action: 'getPriorities' })
+  ]);
+  
+  if (tasksRes.success) tasks = tasksRes.tasks;
+  if (teamRes.success) team = teamRes.team;
+  if (deptsRes.success) departments = deptsRes.departments;
+  if (prioritiesRes.success) priorities = prioritiesRes.priorities;
+  
+  populateFilters();
+  populateUserFilter();
+  renderTasks();
+  showToast('Data loaded ✓');
+}
+
+function populateFilters() {
+  const filtersDiv = document.querySelector('.filters');
+  filtersDiv.innerHTML = '<div class="filter-chip active" data-dept="all" onclick="setDeptFilter(\'all\',this)">All Departments</div>';
+  departments.forEach(d => {
+    filtersDiv.innerHTML += `<div class="filter-chip" data-dept="${d.id}" onclick="setDeptFilter('${d.id}',this)">${d.name}</div>`;
+  });
+}
+
+function populateUserFilter() {
+  const select = document.getElementById('user-filter');
+  select.innerHTML = '<option value="">View as: Everyone</option>';
+  team.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = `View as: ${p.name}`;
+    select.appendChild(opt);
+  });
+}
+
+function setUserFilter() {
+  currentUser = document.getElementById('user-filter').value;
+  renderTasks();
+}
+
+function setDeptFilter(deptId, el) {
+  currentDept = deptId;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderTasks();
+}
+
+function getFilteredTasks() {
+  let f = [...tasks];
+  
+  if (currentUser) {
+    const userDept = team.find(t => t.id === currentUser)?.departmentId;
+    f = f.filter(t => {
+      if (t.assignmentType === 'individual') return t.assigneeId === currentUser;
+      return t.departmentId === userDept;
+    });
+  }
+  
+  if (currentDept !== 'all') {
+    f = f.filter(t => t.departmentId === currentDept);
+  }
+  
+  return f;
+}
+
+function renderTasks() {
+  const container = document.getElementById('task-container');
+  const filtered = getFilteredTasks();
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="loading">No tasks</div>';
+    updateCounts();
+    return;
+  }
+
+  container.innerHTML = filtered.map(t => {
+    const priority = getPriorityById(t.priorityId);
+    const assignee = getTeamById(t.assigneeId);
+    const dept = getDeptById(t.departmentId);
+    const dueClass = daysFromNow(t.due) < 0 ? 'overdue' : '';
+    
+    const checklistProgress = t.checklist ? calculateChecklistProgress(t.checklist, t.checklistCompleted) : '';
+    const lastComment = ''; // TODO: get last comment
+    
+    return `<div class="task-row ${t.status==='done'?'done':''}">
+      <div class="task-check ${t.status==='done'?'checked':''}" onclick="toggleDone('${t.id}',event)">${t.status==='done'?'✓':''}</div>
+      <div>${priority ? `<span class="priority-badge priority-${priority.id}">${priority.id}</span>` : ''}</div>
+      <div class="task-content">
+        <div class="task-name">${t.name}</div>
+        <div class="task-meta">
+          ${checklistProgress ? `<span class="task-meta-item">✓ ${checklistProgress}</span>` : ''}
+          ${lastComment ? `<span class="task-meta-item">💬 ${lastComment}</span>` : ''}
+        </div>
+      </div>
+      <div class="task-assignee">${assignee ? assignee.name : 'Unassigned'}</div>
+      <div class="task-dept">${dept ? dept.name : ''}</div>
+      <div class="task-due ${dueClass}">${formatDate(t.due)}</div>
+    </div>`;
+  }).join('');
+
+  updateCounts();
+}
+
+function calculateChecklistProgress(checklistJson, completedJson) {
+  try {
+    const items = JSON.parse(checklistJson || '[]');
+    const completed = JSON.parse(completedJson || '[]');
+    if (items.length === 0) return '';
+    return `${completed.length}/${items.length}`;
+  } catch(e) {
+    return '';
+  }
+}
+
+function updateCounts() {
+  const overdue = tasks.filter(t => t.status !== 'done' && daysFromNow(t.due) < 0).length;
+  const week = tasks.filter(t => t.status !== 'done' && daysFromNow(t.due) >= 0 && daysFromNow(t.due) <= 7).length;
+  const available = tasks.filter(t => t.assignmentType === 'department' && !t.pickedUpById && t.status !== 'done').length;
+  const done = tasks.filter(t => t.status === 'done').length;
+  
+  document.getElementById('s-overdue').textContent = overdue;
+  document.getElementById('s-week').textContent = week;
+  document.getElementById('s-available').textContent = available;
+  document.getElementById('s-done').textContent = done;
+}
+
+function daysFromNow(dateStr) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((d - today) / 86400000);
+}
+
+function formatDate(dateStr) {
+  const diff = daysFromNow(dateStr);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  if (diff === -1) return 'Yesterday';
+  if (diff < 0) return `${Math.abs(diff)}d overdue`;
+  if (diff <= 7) return `In ${diff} days`;
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
+function getTeamById(id) { return team.find(t => t.id === id); }
+function getDeptById(id) { return departments.find(d => d.id === id); }
+function getPriorityById(id) { return priorities.find(p => p.id === id); }
+
+async function toggleDone(id, e) {
+  e.stopPropagation();
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+  
+  const newStatus = task.status === 'done' ? 'pending' : 'done';
+  await api({ action: 'updateTask', id: task.id, status: newStatus, completedBy: currentUser || 'User' });
+  await loadData();
+}
+
+function openModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Add New Task';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('f-assignment-type').value = 'individual';
+  
+  const deptSelect = document.getElementById('f-dept');
+  deptSelect.innerHTML = departments.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+  
+  const prioritySelect = document.getElementById('f-priority');
+  prioritySelect.innerHTML = priorities.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  
+  const assigneeSelect = document.getElementById('f-assignee');
+  assigneeSelect.innerHTML = '<option value="">Select...</option>' + team.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  
+  const d = new Date(); d.setDate(d.getDate() + 7);
+  document.getElementById('f-due').value = d.toISOString().split('T')[0];
+  document.getElementById('f-recur').value = 'none';
+  
+  checklistItems = [];
+  renderChecklistItems();
+  
+  toggleAssignee();
+  
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function toggleAssignee() {
+  const type = document.getElementById('f-assignment-type').value;
+  document.getElementById('assignee-row').style.display = type === 'individual' ? 'block' : 'none';
+}
+
+function addChecklistItem() {
+  checklistItems.push({ text: '', checked: false });
+  renderChecklistItems();
+}
+
+function renderChecklistItems() {
+  const container = document.getElementById('checklist-items');
+  if (checklistItems.length === 0) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--text-muted)">No checklist items</div>';
+    return;
+  }
+  container.innerHTML = checklistItems.map((item, i) => `
+    <div class="checklist-item">
+      <input type="text" value="${item.text}" onchange="checklistItems[${i}].text=this.value" placeholder="Checklist item..." />
+      <span class="checklist-remove" onclick="removeChecklistItem(${i})">×</span>
+    </div>
+  `).join('');
+}
+
+function removeChecklistItem(idx) {
+  checklistItems.splice(idx, 1);
+  renderChecklistItems();
+}
+
+async function saveTask() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('Please enter a task name'); return; }
+  
+  const assignmentType = document.getElementById('f-assignment-type').value;
+  const assigneeId = assignmentType === 'individual' ? document.getElementById('f-assignee').value : '';
+  
+  const data = {
+    name,
+    departmentId: document.getElementById('f-dept').value,
+    priorityId: document.getElementById('f-priority').value,
+    assignmentType,
+    assigneeId,
+    assignedById: currentUser || 'ADMIN',
+    due: document.getElementById('f-due').value,
+    recurrence: document.getElementById('f-recur').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    checklist: JSON.stringify(checklistItems.map(i => i.text).filter(t => t)),
+    notifyAssigneeOnAssign: document.getElementById('n-assign-assignee').checked,
+    notifyCreatorOnComment: document.getElementById('n-comment-creator').checked,
+    notifyAssigneeOnComment: document.getElementById('n-comment-assignee').checked,
+    notifyCreatorOnComplete: document.getElementById('n-complete-creator').checked,
+    notifyAssigneeOnComplete: document.getElementById('n-complete-assignee').checked,
+    notifyOnOverdue: document.getElementById('n-overdue').checked,
+  };
+  
+  closeModal();
+  
+  if (editingId) {
+    await api({ action: 'updateTask', id: editingId, ...data });
+    showToast('Task updated ✓');
+  } else {
+    await api({ action: 'addTask', ...data });
+    showToast('Task created ✓');
+  }
+  
+  await loadData();
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if(e.target === this) closeModal();
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+setInterval(() => { if (SCRIPT_URL) loadData(); }, 60000);
+</script>
 </body>
 </html>
